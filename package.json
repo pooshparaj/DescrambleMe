@@ -1,15 +1,19 @@
 {
   "name": "DescrambleMe",
-  "version": "0.0.0",
-  "description": "English Education project for Pearson Hackathon November 2013",
-  "main": "app.js",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "description":"English Education project for Pearson Hackathon November 2013",
   "dependencies": {
-    "express": ">=3.x",
-    "mongodb": "*",
+    "express": "3.4.0",
+    "jade": "*",
+	"mongodb": "*",
 	"socket.io":"*"
   },
-  "repository": {
+  "repository" :
+  { 
 	"type" : "git",
-	"url" : "https://github.com/KarthickSelvam/descrambleme"
+	"url" : "https://github.com/KarthickSelvam/descrambleme.git"
   }
 }
