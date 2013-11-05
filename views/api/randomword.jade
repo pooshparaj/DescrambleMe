@@ -1,0 +1,8 @@
+link(rel='stylesheet', href='/stylesheets/tag.css')
+div.tags
+	ul
+		-for(var i=0; i<title.length;i++){
+		-var tagNo=Math.floor((Math.random()*5)+1);
+		li(class="tag#{tagNo}")
+			a(onclick="WordSelect('#{title[i].word}')") #{title[i].word}
+		-}
