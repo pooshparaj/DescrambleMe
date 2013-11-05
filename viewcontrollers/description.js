@@ -87,24 +87,30 @@ function getPhrases(value,res,imagecollection,obj)
 				var phraseObj = "";
 				parseString(body, function (err, result) {
 					phraseObj = result;	
-				});	
-				
-				keyWord = obj.results[0].headword;
-				Definition = obj.results[0].senses[0].definition;
-				if(obj.results[0].senses[0].examples)
+				});
+				if(Object.keys(obj).length > 0)
 				{						
-					Usage = obj.results[0].senses[0].examples[0].text;
-					if(obj.results[0].senses[0].examples[0].audio)
-						Audio = obj.results[0].senses[0].examples[0].audio[0].url;
-				}
+					for (var item = 0; item < Object.keys(obj).length; item++) {
+							if(obj.results[item].headword == value)
+							{	
+								keyWord = obj.results[item].headword;
+								Definition = obj.results[item].senses[0].definition;
+								if(obj.results[item].senses[0].examples)
+								{						
+								Usage = obj.results[item].senses[0].examples[0].text;
+								if(obj.results[item].senses[0].examples[0].audio)
+								Audio = obj.results[item].senses[0].examples[0].audio[0].url;
+								}						
+							}
+					}
+				}				
 				var image = "";
 				if(imagecollection.length != null)
 				image = imagecollection.images[0].url+","+imagecollection.images[1].url+","+imagecollection.images[2].url			
 
 				var collection = {'KeyWord':keyWord,'Audio':Audio,'Definition':Definition,'Usage':Usage,'Phrase':phraseObj.results.result[0].example,'Synonyms':Synonyms, 'Anagrams':Anagrams,'Images':image}
 				
-				res.render('description/description',{data:collection})	
-				
+				res.render('description/description',{data:collection})				
 				
 			});
 		});
