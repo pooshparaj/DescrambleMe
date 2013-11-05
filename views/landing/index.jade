@@ -1,5 +1,21 @@
-extends ../layout
-
-block content
-  h1= title
-  p Welcome to #{title}
+!!! 5
+html
+  head
+    title Express
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    link(href='stylesheets/video-js.css', rel='stylesheet')
+    script(src='/js/video.js')
+    script(src='/js/Descramble.js')
+  body
+    #intro.intro
+      video#example_video_1.video-js.vjs-default-skin.vjs-big-play-centered(controls='controls', preload='auto', width='640', height='264', poster='/images/minions.jpg', data-setup='{"example_option":true}')
+        source(src='/assets/MinionsBanana.mp4', type='video/mp4')
+          source(src='/assets/MinionsBanana.ogg', type='video/ogg')
+            | Your browser does not support the video tag.
+    .inputField
+      form#introForm(name='introForm', type='post', action='/')
+        | User Name :
+        input#username(type='text', name='username')
+        | Email Address :
+        input#emailAddress(type='text', name='emailAddress')
+        a.click(onclick='javascript:document.getElementById(\'introForm\').submit();') click here
