@@ -14,16 +14,16 @@ var parseString = require('xml2js').parseString;
 
 module.exports.controller = function(app){
 	app.get('/description',function(req,res){
-		getWordDetails("cqAFg509aw", res, "rose");
+		getWordDetails(res, "compute");
 	});
 };
 
 
-function getWordDetails(id,res,value) 
+function getWordDetails(res,value) 
 {		var http = require("http");
 		var options = {
 			host : 'api.pearson.com',
-			path : '/v2/dictionaries/entries?search='+id+'&apikey=6pUM7idZK2khzpx31xSfUoUapA2wQbzm',
+			path : '/v2/dictionaries/entries?headword='+value+'&apikey=6pUM7idZK2khzpx31xSfUoUapA2wQbzm',
 			port : 80,
 			method : 'GET'
 		}
@@ -91,11 +91,14 @@ function getPhrases(value,res,imagecollection,obj)
 				
 				keyWord = obj.results[0].headword;
 				Definition = obj.results[0].senses[0].definition;
-				if(obj.results[0].senses[0].gramatical_examples)
+				if(obj.results[0].senses[0].examples)
 				{						
-					Usage = obj.results[0].senses[0].gramatical_examples[0].examples[0].text;
+					Usage = obj.results[0].senses[0].examples[0].text;
+					if(obj.results[0].senses[0].examples[0].audio)
+						Audio = obj.results[0].senses[0].examples[0].audio[0].url;
 				}
 				var image = "";
+				if(imagecollection.length != null)
 				image = imagecollection.images[0].url+","+imagecollection.images[1].url+","+imagecollection.images[2].url			
 
 				var collection = {'KeyWord':keyWord,'Audio':Audio,'Definition':Definition,'Usage':Usage,'Phrase':phraseObj.results.result[0].example,'Synonyms':Synonyms, 'Anagrams':Anagrams,'Images':image}
