@@ -6,7 +6,6 @@ var Audio = "";
 var Definition = ""
 var Usage = "";
 var Phrase = "";
-var Synonyms="";
 var Anagrams = "";
 var Images = "";
 var parseString = require('xml2js').parseString;
@@ -60,6 +59,35 @@ function getDKImages(value,res,obj)
 			});
 			response.on('end', function() {	
 				imagecollection = JSON.parse(body);
+				if(imagecollection.images.length > 0)
+					getPhrases(value,res,imagecollection,obj);
+				else
+					getGoogleImages(value,res,obj)
+					
+			});
+		});
+		request.on('error', function(e) {
+		console.log('Problem with request: ' + e.message);
+		});
+		request.end();
+}
+
+function getGoogleImages(value,res,obj) 
+{		var http = require("http");
+		var options = {
+			host : 'ajax.googleapis.com',
+			path : '/ajax/services/search/images?v=1.0&q='+value,
+			port : 80,
+			method : 'GET'
+		}
+		var request = http.request(options, function(response){
+			var body = ""
+			response.on('data', function(data) {
+			  body += data;
+			});
+			response.on('end', function() {	
+				imagecollection = JSON.parse(body);
+				//console.log('Problem with request: ' + JSON.stringify(imagecollection));
 				getPhrases(value,res,imagecollection,obj);
 			});
 		});
@@ -89,7 +117,7 @@ function getPhrases(value,res,imagecollection,obj)
 				parseString(body, function (err, result) {
 					phraseObj = result;	
 				});
-				getSynonyms(value,res,imagecollection,obj,phraseObj)				
+				getAnagrams(value,res,imagecollection,obj,phraseObj)				
 			});
 		});
 		request.on('error', function(e) {
@@ -98,7 +126,7 @@ function getPhrases(value,res,imagecollection,obj)
 		request.end();
 }
 
-function getSynonyms(value,res,imagecollection,obj,phraseObj)
+function getAnagrams(value,res,imagecollection,obj,phraseObj)
 {
 	var http = require("http");
 		var options = {
@@ -121,8 +149,36 @@ function getSynonyms(value,res,imagecollection,obj,phraseObj)
 						letter  = letter + data.best[l];
 						else
 						letter  = letter + data.best[l] + ","
-				}		
+				}
+				getSynonyms(value,res,imagecollection,obj,phraseObj,letter)				
+			});
+		});
+		request.on('error', function(e) {
+			console.log('Problem with request: ' + e.message);
+		});
+		request.end();
+}
+
+function getSynonyms(value,res,imagecollection,obj,phraseObj,letter)
+{
+	var http = require("http");
+		var options = {
+			host : 'stands4.com',
+			path : '/services/v2/syno.php?uid=2167&tokenid=LL870U6UWvQIh9w&word='+value,
+			port : 80,
+			method : 'GET'
+		}
+		var request = http.get(options, function(response){
+			var body = ""
+			response.on('data', function(data) {
+			  body += data;
+			});
 			
+			response.on('end', function() {
+				var synonymObj = "";
+				parseString(body, function (err, result) {
+					synonymObj = result;	
+				});
 				if(Object.keys(obj).length > 0)
 				{						
 					for (var item = 0; item < obj.results.length; item++) {
@@ -130,7 +186,7 @@ function getSynonyms(value,res,imagecollection,obj,phraseObj)
 							{	
 								keyWord = obj.results[item].headword;
 								Definition = obj.results[item].senses[0].definition;
-								console.log('Problem with request: ' + Definition);
+								//console.log('Problem with request: ' + Definition);
 								if(obj.results[item].senses[0].examples)
 								{						
 								Usage = obj.results[item].senses[0].examples[0].text;
@@ -141,16 +197,49 @@ function getSynonyms(value,res,imagecollection,obj,phraseObj)
 							}
 					}
 				}
-				console.log('Problem with request: ' + JSON.stringify(phraseObj));
+				//console.log('Problem with request: ' + JSON.stringify(phraseObj));
 				if(phraseObj.results.result){
 					Phrase = phraseObj.results.result[0].explanation
+				}			
+				var image = "";
+				//console.log('Problem with request: ' + JSON.stringify(imagecollection));
+				//console.log('Problem with request: ' + JSON.stringify(imagecollection));
+				if(imagecollection.images)
+				{	//console.log('if: ' + JSON.stringify(imagecollection));
+					if(imagecollection.images.length > 0)
+					{
+						for (var l = 0; l < imagecollection.images.length; l++) {
+							if(l == imagecollection.images.length-1)
+							image  = image + imagecollection.images[0].url;
+							else
+							image  = image + imagecollection.images[0].url + ","
+						}
+					}
+				}
+				else
+				{	if(imagecollection.responseData.results)
+					{
+						for (var l = 0; l < imagecollection.responseData.results.length; l++) 
+						{	if(l == imagecollection.responseData.results.length-1)
+							image  = image + imagecollection.responseData.results[l].url;
+							else
+							image  = image + imagecollection.responseData.results[l].url + ","
+						}
+					}
 				}
 				
-				var image = "";
-				if(imagecollection.length != null)
-				image = imagecollection.images[0].url+","+imagecollection.images[1].url+","+imagecollection.images[2].url			
-
-				var collection = {'KeyWord':keyWord,'Audio':Audio,'Definition':Definition,'Usage':Usage,'Phrase':Phrase,'Synonyms':Synonyms, 'Anagrams':letter,'Images':image}
+				var Synonyms = "";
+				var Antonyms = "";
+				var speech = "";
+				if(synonymObj.results.result)
+				{	
+						Synonyms = synonymObj.results.result[0].synonyms;
+						Antonyms = synonymObj.results.result[0].antonyms;
+						speech = synonymObj.results.result[0].partofspeech;
+				}
+					//console.log('Problem with request: ' + Synonyms);
+				
+				var collection = {'KeyWord':value,'Speech':speech,'Audio':Audio,'Definition':Definition,'Usage':Usage,'Phrase':Phrase,'Synonyms':Synonyms,'Antonyms':Antonyms,'Anagrams':letter,'Images':image}
 				
 				res.render('description/description',{data:collection})				
 				
